@@ -1,0 +1,113 @@
+<html >
+<head>
+	<meta charset="utf-8" />
+	<script type="text/javascript">
+	// -----------------------------------------------------------------------------
+	// 初期化を行なう。ここは、body 要素の onload イベントで呼び出される
+	// -----------------------------------------------------------------------------
+	function Init( ){
+
+		// それぞれの要素にアクセスしやすいように、変数に設定しておく
+		var startButton =	document.getElementById("startButton");
+		var today = 		document.getElementById('today');
+		var weather = 		document.getElementById('weather');
+		var high = 			document.getElementById('high');
+		var low = 			document.getElementById('low');
+		var details = 		document.getElementById('details');
+
+		// startButton がクリックされた時に実行されるイベントを設定する
+		startButton.addEventListener("click", function(){
+
+			// 天気を問い合わせる PHP を変数に設定する
+			var URL = "Tokyo.php";
+
+			// 通信に使用する XMLHttpRequest を変数に設定する
+			var XHR = new XMLHttpRequest();
+
+			// 通信の状況が変わった時に、どうすればよいのかを決めておく
+			XHR.onreadystatechange = function() {
+
+				// 通信の完了時に...
+				if (XHR.readyState == 4) {
+
+					// 通信が成功した時に...
+					if (XHR.status == 200) {
+
+						// JSON 形式の返答を解析して、取り出せるようにする
+						var J = JSON.parse(  this.responseText  );
+
+						// 日付を画面に表示する
+						today.innerHTML = J.forecasts[0].date;
+
+						// 天気を画面に表示する
+						weather.innerHTML = J.forecasts[0].telop;
+
+						// 最高気温のデータが入っていれば...
+						if( J.forecasts[0].temperature.max ){
+							// 最高気温を画面に表示する
+							high.innerHTML = J.forecasts[0].temperature.max.celsius;
+						}
+						// 入っていなければ...
+						else {
+							// 「-」を画面に表示する
+							high.innerHTML = "-";
+						}
+
+						// 最低気温のデータが入っていれば...
+						if( J.forecasts[0].temperature.min ){
+							// 最低気温を画面に表示する
+							low.innerHTML = J.forecasts[0].temperature.min.celsius;
+						}
+						// 入っていなければ...
+						else {
+							// 「-」を画面に表示する
+							low.innerHTML = "-";
+						}
+
+						// 概況を画面に表示する
+						details.innerHTML = J.description.text;
+
+				    }  // XHR.status == 200
+				}  // XHR.readyState == 4
+
+				// まだ通信が完了していなければ...
+				else{
+					// 通信中を表示する
+					today.innerHTML = "通信中..."
+
+				}  // XHR.readyState == 4
+			}  // XHR.onreadystatechange 
+
+			// ↑ここまでは通信の状況が変わった時に、どうすればよいのかを決めるルール。
+			// ルールを決めただけなので、なにも変化はない
+
+			// 通信に使用する XMLHttpRequest を初期化する
+			XHR.open('GET', URL, true);
+
+			// XMLHttpRequest からサーバーに対して要求を送信する
+			// 返答が返ってきたら通信の状況が変わった時にどうするのか決めた上のルールが実行される
+			XHR.send( );
+
+
+		});
+
+	}
+	</script>
+
+</head>
+
+<!-- ------------------------------------------ -->
+<body onload="Init( );">
+
+	<input id="startButton" type="button" value="今日の天気は？" />
+	<div id="today"></div>
+	<div id="weather"></div>
+	<div id="high"></div>
+	<div id="low"></div>
+	<div id="details"></div>
+
+
+</body>
+</html>
+
+
